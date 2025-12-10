@@ -2,8 +2,9 @@
 {
     public class PostViewModel
     {
-        public string Author { get; set; }
-        public string Content { get; set; }
-        public string Created {  get; set; }
+        public string Author { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
+        public DateTime Created { get; set; } = DateTime.Now;
+
     }
 }

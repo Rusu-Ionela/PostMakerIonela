@@ -16,29 +16,9 @@ namespace Lab_4_PAD.Controllers
          _postService = postService;
         }
 
-        public IActionResult Index()
-        {
-            var dtos = _postService.GetPosts();
-            var posts = dtos.Select(x => new PostViewModel()
-            {
-                Author = x.Author,
-                Content = x.Content,
-                Created = x.Created.ToString()
-            }).ToList();
-
-            return View(posts);
-        }
-
-        [HttpGet]
-        public IActionResult CreatePost()
-        {
-            return View();
-        }
-
         [HttpPost]
-        public IActionResult CreatePost(CreatePostViewModel model) 
-        
-        { 
+        public IActionResult CreatePost(CreatePostViewModel model)
+        {
             if (ModelState.IsValid)
             {
                 var dto = new PostDto()
@@ -49,12 +29,20 @@ namespace Lab_4_PAD.Controllers
 
                 _postService.CreatePost(dto);
                 return RedirectToAction("Index");
-
             }
 
+            return View(model);
+        }
 
+
+
+        [HttpGet]
+        public IActionResult CreatePost()
+        {
             return View();
         }
+
+  
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
