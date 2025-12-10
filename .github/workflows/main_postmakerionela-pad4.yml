@@ -1,5 +1,10 @@
 name: Build and deploy ASP.Net Core app to Azure Web App - postmakerionela-pad4
 
+env:
+  AZURE_WEBAPP_NAME: postmakerionela-pad4
+  AZURE_WEBAPP_PACKAGE_PATH: './myapp'
+  DOTNET_VERSION: '8.x'
+
 on:
   push:
     branches:
@@ -18,25 +23,24 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ./myapp
+        run: dotnet publish -c Release -o ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: app
-          path: ./myapp
+          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
   deploy:
     runs-on: windows-latest
     needs: build
     permissions:
-      id-token: write
       contents: read
 
     steps:
@@ -44,18 +48,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: app
-          path: ./myapp
-
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_96F497C3A6D7425EBF48969024681569 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_82E43177933347F8BC03220919E9335C }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_22948753419141949E32E0725DDFD389 }}
+          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'postmakerionela-pad4'
-          slot-name: 'Production'
-          package: ./myapp
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
